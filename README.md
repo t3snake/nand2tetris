@@ -1,5 +1,8 @@
-# nand2tetris
-Solutions and notes for Nand2Tetris Course
+# nand2tetris - Building a modern computer from first principles
+Solutions and notes for Nand2Tetris Course  
+[Web IDE](https://nand2tetris.github.io/web-ide)  
+[Coursera Link](https://www.coursera.org/learn/build-a-computer)  
+[Website](https://www.nand2tetris.org/)  
 
 ## Week 1
 [Logic Gate Chips](./LogicGates/README.md)

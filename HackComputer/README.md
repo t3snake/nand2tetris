@@ -1,4 +1,7 @@
 # Implementing Hack Computer
+[Book Chapter 5 Computer Architecture](https://www.nand2tetris.org/_files/ugd/44046b_552ed0898d5d491aabafd8a768a87c6f.pdf)  
+
+Building a Hack Computer (Memory CPU and overall computer) which is capable of running Hack Machine language instructions.
 
 ## Memory Chip
 ![Memory Chip](./notes/HackMemory.png)
