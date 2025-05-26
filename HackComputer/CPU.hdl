@@ -59,5 +59,41 @@ CHIP CPU {
     zx= instruction[11], nx= instruction[10], zy= instruction[9], ny= instruction[8], f= instruction[7], no= instruction[6], 
     out= finalOutputReg, zr= isZero, ng= isNegative);
 
+    // duplicate outputs since output pin cant be used as input
+    And16(a= finalOutputReg, b= true, out= outM);
+    And16(a= outputAReg, b= true, out[0..14]= addressM);
+
+    // load m register if op code is 1 and 1st destination bit is 1
+    And(a= instruction[3], b= instruction[15], out= writeM);
+
+    // program counter: if jump then load
+    // Calculate jump bit = f(jump_bits, alu_ouptuts)
+    And(a= instruction[0], b= instruction[1], out= j2AndJ3);
+    And(a= j2AndJ3, b= instruction[2], out= andJumpBits);
+
+    Not(in= isZero, out= notIsZero);
+    Not(in= isNegative, out= notIsNegative);
+    And(a= notIsZero, b= notIsNegative, out= isPositive);
+
+    Nand(a= instruction[2], b= instruction[0], out= j1NandJ3);
+    And(a= instruction[1], b= isZero, out= j2AndIsZero);
+    And(a= j1NandJ3, b= j2AndIsZero, out= part2);
+
+    Nand(a= instruction[2], b= instruction[1], out= j1NandJ2);
+    And(a= instruction[0], b= isPositive, out= j3AndIsPos);
+    And(a= j1NandJ2, b= j3AndIsPos, out= part1);
+
+    Nand(a= instruction[0], b= instruction[1], out= j2NandJ3);
+    And(a= instruction[2], b= isNegative, out= j1AndIsNeg);
+    And(a= j2NandJ3, b= j1AndIsNeg, out= part3);
+
+    Or(a= part1, b= part2, out= part1Orpart2);
+    Or(a= part3, b= andJumpBits, out= part3OrAndAll);
+    Or(a= part1Orpart2, b= part3OrAndAll, out= jumpBitTemp);
+
+    // load pc only if op code is 1
+    And(a= jumpBitTemp, b= instruction[15], out= jumpBit);
+
+    PC(in= outputAReg, load= jumpBit, inc= true, reset= reset, out[0..14]= pc);
 
 }
