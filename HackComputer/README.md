@@ -66,6 +66,9 @@ pc[15]; // address of next instruction
 ### Implementation
 [CPU.hdl](./CPU.hdl)
 
+#### CPU Jump Bit calculation
+![Calc](./notes/JumpBitCalculation.png)
+
 ## Computer Chip
 ![Computer Chip](./notes/HackComputer.png)  
 
