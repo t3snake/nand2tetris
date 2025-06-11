@@ -44,16 +44,17 @@ func main() {
 }
 
 func translateLinesToByteCode(lines []string) []string {
-	variable_symbol_table := make(map[string]string, 0)
-	lines_wo_symbols, label_symbol_table := createSymbolTable(lines)
+	lines_wo_symbols, symbol_table := createSymbolTable(lines)
 
 	fmt.Printf("lines without labels:\n%s\n", lines_wo_symbols)
-	fmt.Printf("label symbols:\n%s\n", label_symbol_table)
+	fmt.Printf("label symbols:\n%s\n", symbol_table)
 
 	byte_code_instructions := make([]string, len(lines_wo_symbols))
 
+	new_memory_address := 16
+
 	for idx, line := range lines_wo_symbols {
-		byte_code_instructions[idx] = translateLineToByteCode(line, &variable_symbol_table, label_symbol_table)
+		byte_code_instructions[idx] = translateLineToByteCode(line, symbol_table, &new_memory_address)
 	}
 
 	return byte_code_instructions
@@ -61,18 +62,38 @@ func translateLinesToByteCode(lines []string) []string {
 
 func translateLineToByteCode(
 	hack_stm string,
-	variable_symbol_table *map[string]string,
-	label_symbol_table map[string]string,
+	symbol_table map[string]string,
+	cur_mem *int,
 ) string {
+	after, isATypeAddr := strings.CutPrefix(hack_stm, "@")
+
+	if isATypeAddr {
+		address, ok := symbol_table[after]
+		if ok {
+			return get16DigitBinary(address)
+		}
+		// if new symbol add to table with current address
+		symbol_table[after] = strconv.Itoa(*cur_mem)
+		*cur_mem++
+		return get16DigitBinary(symbol_table[after])
+	}
+	// c instruction
+
 	return ""
 }
 
-// Create label symbol table with predefined and user defined symbols.
-func createSymbolTable(lines []string) (lines_wo_labels []string, label_symbol_table map[string]string) {
-	label_symbol_table = makeLabelSymbolTable()
-	lines_wo_labels = make([]string, 0)
+func get16DigitBinary(address_str string) string {
+	address, err := strconv.Atoi(address_str)
+	if err != nil {
+		log.Fatal("Expected string got: " + address_str)
+	}
+	return fmt.Sprintf("%016b", address)
+}
 
-	current_address := 17
+// Create symbol table with predefined symbols and user defined labels.
+func createSymbolTable(lines []string) (lines_wo_labels []string, symbol_table map[string]string) {
+	symbol_table = makeLabelSymbolTable()
+	lines_wo_labels = make([]string, 0)
 
 	for _, line := range lines {
 		if len(line) == 0 {
@@ -81,14 +102,15 @@ func createSymbolTable(lines []string) (lines_wo_labels []string, label_symbol_t
 			temp := strings.ReplaceAll(line, "(", "")
 			label := strings.ReplaceAll(temp, ")", "")
 
-			label_symbol_table[label] = strconv.Itoa(current_address)
-			current_address++
+			// if there were 4 statements previously before label, 0 1 2 3
+			// and label would point to 4 thus len of lines_wo_labels
+			symbol_table[label] = strconv.Itoa(len(lines_wo_labels))
 		} else {
 			lines_wo_labels = append(lines_wo_labels, line)
 		}
 	}
 
-	return lines_wo_labels, label_symbol_table
+	return lines_wo_labels, symbol_table
 }
 
 // Make label symbol table and prepopulate with predefined symbols
