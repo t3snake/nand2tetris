@@ -19,6 +19,9 @@ Solutions and notes for Nand2Tetris Course
 ## Week 5
 [Hack Computer Chips](./HackComputer/README.md)
 
+## Week 6
+[Assembler for Hack Assembly written in golang](./Assembler/README.md)
+
 
 ## Chipset API
 ```
